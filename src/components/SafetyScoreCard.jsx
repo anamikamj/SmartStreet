@@ -1,6 +1,4 @@
-import { useState } from "react";
-
-// ─── Stat field pill (matches the Date/Time/Venue/EntryFees boxes) ────────────
+// ─── Stat field pill ──────────────────────────────────────────────────────────
 function InfoPill({ label, value }) {
   return (
     <div style={{
@@ -32,7 +30,7 @@ function InfoPill({ label, value }) {
   );
 }
 
-// ─── Stat badge (offenders, abductions, etc.) ─────────────────────────────────
+// ─── Stat badge ───────────────────────────────────────────────────────────────
 function StatBadge({ label, value, alert }) {
   return (
     <div style={{
@@ -55,7 +53,7 @@ function StatBadge({ label, value, alert }) {
 }
 
 // ─── Main card ────────────────────────────────────────────────────────────────
-function SafetyScoreCard({ score, level, color, advice, counts, date, time, venue, entryFees }) {
+export default function SafetyScoreCard({ score, level, color, advice, counts, date, time, venue, entryFees }) {
   return (
     <div style={{
       background: "rgba(10, 10, 10, 0.92)",
@@ -83,21 +81,10 @@ function SafetyScoreCard({ score, level, color, advice, counts, date, time, venu
           {score}
         </div>
         <div style={{ paddingTop: "6px" }}>
-          <div style={{
-            fontSize: "21px",
-            fontWeight: "700",
-            color: "#e8e8e8",
-            letterSpacing: "0.04em",
-          }}>
+          <div style={{ fontSize: "21px", fontWeight: "700", color: "#e8e8e8", letterSpacing: "0.04em" }}>
             {level}
           </div>
-          <div style={{
-            fontSize: "12px",
-            color: "#888",
-            marginTop: "3px",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}>
+          <div style={{ fontSize: "12px", color: "#888", marginTop: "3px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
             Street Safety Score
           </div>
         </div>
@@ -120,67 +107,25 @@ function SafetyScoreCard({ score, level, color, advice, counts, date, time, venu
         <span>{advice}</span>
       </div>
 
-      {/* Info pills grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "10px",
-        marginBottom: "14px",
-      }}>
-        
-      </div>
+      {/* Info pills */}
+      {(date || time || venue || entryFees) && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
+          {date && <InfoPill label="Date" value={date} />}
+          {time && <InfoPill label="Time" value={time} />}
+          {venue && <InfoPill label="Venue" value={venue} />}
+          {entryFees && <InfoPill label="Entry Fees" value={entryFees} />}
+        </div>
+      )}
 
       {/* Stats breakdown */}
       {counts && (
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "8px",
-        }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
           <StatBadge label="Offenders Nearby" value={counts.offenders} alert={counts.offenders > 0} />
           <StatBadge label="Abduction Cases" value={counts.abductions} alert={counts.abductions > 0} />
           <StatBadge label="Crime Reports" value={counts.crimes} alert={counts.crimes > 0} />
           <StatBadge label="Unsafe Zones" value={counts.unsafeZones} alert={counts.unsafeZones > 0} />
         </div>
       )}
-    </div>
-  );
-}
-
-// ─── Demo wrapper (shows card over a fake map background) ─────────────────────
-export default function App() {
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#0d0d0d",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Georgia', serif",
-      padding: "32px",
-    }}>
-      {/* Simulated map bg */}
-      <div style={{
-        position: "fixed", inset: 0,
-        background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)",
-        opacity: 0.4,
-        zIndex: 0,
-      }} />
-
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <SafetyScoreCard
-          score={11}
-          level="Dangerous"
-          color="#c0392b"
-          advice="Serious threat history. Do not travel alone. Call for help if needed."
-          counts={{
-            offenders: 3,
-            abductions: 1,
-            crimes: 7,
-            unsafeZones: 2,
-          }}
-        />
-      </div>
     </div>
   );
 }
