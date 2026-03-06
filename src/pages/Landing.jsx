@@ -5,23 +5,6 @@ function Landing() {
 
   return (
     <div className="landing-container">
-      {/* Navigation Bar */}
-      <nav className="navbar">
-        <div className="navbar-left">
-          <div className="brand">SmartStreet</div>
-          <ul className="nav-links">
-            <li><a href="#danger-map">Danger Map</a></li>
-            <li><a href="#report">Report hazard</a></li>
-            <li><a href="#watch">Watch me</a></li>
-          </ul>
-        </div>
-        <div className="navbar-right">
-          <button className="sos-btn">SOS</button>
-          <button className="icon-btn">🔔</button>
-          <button className="icon-btn">👤</button>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="hero-section">
         <h1 className="hero-title">Safer Streets Start With Awareness</h1>

@@ -14,19 +14,22 @@ function Dashboard() {
       icon: "🗺️",
       title: "Danger Map",
       description: "View and navigate around reported hazard zones in your area",
-      color: "#ff9f43"
+      color: "#ff9f43",
+      route: "/danger-map"
     },
     {
       icon: "⚠️",
       title: "Report Hazard",
       description: "Help your community by reporting street hazards, potholes, or dangerous areas",
-      color: "#feca57"
+      color: "#feca57",
+      route: "/report"
     },
     {
       icon: "🆘",
       title: "SOS Alert",
       description: "Instantly send emergency alerts to your trusted contacts and authorities",
-      color: "#ff4d6d"
+      color: "#ff4d6d",
+      route: "/sos"
     }
   ];
 
@@ -49,7 +52,12 @@ function Dashboard() {
 
         <div className="dashboard-grid">
           {dashboardFeatures.map((feature, index) => (
-            <div key={index} className="dashboard-card">
+            <div
+              key={index}
+              className="dashboard-card"
+              onClick={() => navigate(feature.route)}
+              style={{ cursor: "pointer" }}
+            >
               <div className="card-icon">{feature.icon}</div>
               <h3 className="card-title">{feature.title}</h3>
               <p className="card-description">{feature.description}</p>
