@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../services/supabaseClient";
+import { useVoiceSOS } from "../hooks/useVoiceSOS";
+import { useCommunityAlert } from "../hooks/useCommunityAlert";
+import VoiceSOSBanner from "../components/VoiceSOSBanner";
+import CommunityAlertPanel from "../components/CommunityAlertPanel";
 
 export default function SOSEvidence() {
   const navigate = useNavigate();
@@ -16,6 +20,20 @@ export default function SOSEvidence() {
   const [elapsed, setElapsed] = useState(0);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Voice SOS hook
+  const { voiceListening, voiceSOSActive, resetVoiceSOS } = useVoiceSOS({
+    enabled: !recording,
+    onTriggered: () => {
+      if (!recording) startSOS();
+    },
+  });
+
+  // Community alert hook
+  const {
+    alertSent, alertId, responders, sending,
+    sendCommunityAlert, cancelAlert,
+  } = useCommunityAlert();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -34,7 +52,6 @@ export default function SOSEvidence() {
     return () => clearInterval(interval);
   }, [recording]);
 
-  // Cleanup buzzer on unmount
   useEffect(() => {
     return () => stopBuzzer();
   }, []);
@@ -59,11 +76,11 @@ export default function SOSEvidence() {
       gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.45);
-    } catch (e) { /* ignore */ }
+    } catch (e) { }
   }
 
   function startBuzzer() {
-    playBuzzerBeep(); // immediate first beep
+    playBuzzerBeep();
     buzzerIntervalRef.current = setInterval(playBuzzerBeep, 800);
   }
 
@@ -80,13 +97,11 @@ export default function SOSEvidence() {
   async function startSOS() {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     videoRef.current.srcObject = stream;
-
     const recorder = new MediaRecorder(stream);
     mediaRecorderRef.current = recorder;
     chunksRef.current = [];
     recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
     recorder.start();
-
     setTimestamp(new Date().toLocaleString());
     setRecording(true);
     setSaved(false);
@@ -103,7 +118,6 @@ export default function SOSEvidence() {
     recorder.onstop = async () => {
       const blob = new Blob(chunksRef.current, { type: "video/webm" });
       const fileName = `sos-${Date.now()}.webm`;
-
       videoRef.current.srcObject?.getTracks().forEach((t) => t.stop());
       videoRef.current.srcObject = null;
       setRecording(false);
@@ -136,46 +150,66 @@ export default function SOSEvidence() {
   }
 
   const pageStyle = {
-    minHeight: "100vh",
-    background: "#0f0f0f",
-    padding: "40px 80px",
-    maxWidth: "1400px",
-    margin: "0 auto",
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    color: "#fff",
+    minHeight: "100vh", background: "#0f0f0f",
+    padding: "40px 80px", maxWidth: "1400px", margin: "0 auto",
+    fontFamily: "'Cormorant Garamond', Georgia, serif", color: "#fff",
   };
 
   return (
     <div style={pageStyle}>
-      <button
-        onClick={() => navigate("/sos")}
-        style={{
-          background: "none", border: "1px solid rgba(255,255,255,0.15)",
-          color: "rgba(255,255,255,0.5)", padding: "8px 20px",
-          borderRadius: "50px", cursor: "pointer", fontSize: "14px",
-          marginBottom: "48px", fontFamily: "inherit", letterSpacing: "0.3px"
-        }}
-      >
+
+      {/* Voice SOS banner */}
+      <VoiceSOSBanner
+        active={voiceSOSActive}
+        onDismiss={resetVoiceSOS}
+      />
+
+      <button onClick={() => navigate("/sos")} style={{
+        background: "none", border: "1px solid rgba(255,255,255,0.15)",
+        color: "rgba(255,255,255,0.5)", padding: "8px 20px",
+        borderRadius: "50px", cursor: "pointer", fontSize: "14px",
+        marginBottom: "48px", fontFamily: "inherit",
+      }}>
         ← Back
       </button>
 
       <h1 style={{ fontSize: "56px", fontWeight: "300", letterSpacing: "-1px", marginBottom: "8px" }}>
         🚨 SOS Evidence
       </h1>
-      <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "18px", marginBottom: "40px", fontWeight: "300" }}>
+      <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "18px", marginBottom: "12px", fontWeight: "300" }}>
         Recording is stored securely and reported to authorities
       </p>
+
+      {/* Voice listening indicator */}
+      {!recording && (
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: "8px",
+          fontSize: "12px", color: voiceListening
+            ? "rgba(99,102,241,0.8)"
+            : "rgba(255,255,255,0.2)",
+          fontFamily: "monospace", letterSpacing: "1px",
+          marginBottom: "24px", transition: "color 0.3s",
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: "50%",
+            background: voiceListening ? "#818cf8" : "rgba(255,255,255,0.2)",
+            animation: voiceListening ? "pulse 1s infinite" : "none",
+            display: "inline-block",
+          }} />
+          {voiceListening ? 'VOICE ACTIVE — say "Help me" to trigger SOS' : "VOICE STANDBY"}
+        </div>
+      )}
 
       {recording && (
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "8px",
           background: "rgba(220,38,38,0.15)", border: "1px solid rgba(220,38,38,0.4)",
           color: "#f87171", padding: "8px 18px", borderRadius: "50px",
-          fontSize: "13px", marginBottom: "24px", letterSpacing: "1px"
+          fontSize: "13px", marginBottom: "24px", letterSpacing: "1px",
         }}>
           <span style={{
-            width: "7px", height: "7px", borderRadius: "50%",
-            background: "#f87171", animation: "pulse 1s infinite"
+            width: 7, height: 7, borderRadius: "50%",
+            background: "#f87171", animation: "pulse 1s infinite",
           }} />
           RECORDING — {formatTime(elapsed)}
         </div>
@@ -184,56 +218,62 @@ export default function SOSEvidence() {
       <div style={{
         borderRadius: "16px", overflow: "hidden", background: "#000",
         marginBottom: "24px", border: "1px solid rgba(255,255,255,0.08)",
-        aspectRatio: "16/9", maxHeight: "380px"
+        aspectRatio: "16/9", maxHeight: "380px",
       }}>
-        <video ref={videoRef} autoPlay playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <video ref={videoRef} autoPlay playsInline muted
+          style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
       <div style={{ display: "flex", gap: "12px", marginBottom: "28px" }}>
         <div style={{
           flex: 1, background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "14px 18px"
+          border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "14px 18px",
         }}>
           <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Location</div>
           <div style={{ fontSize: "13px", fontFamily: "monospace", color: "rgba(255,255,255,0.7)" }}>{location}</div>
         </div>
         <div style={{
           flex: 1, background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "14px 18px"
+          border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "14px 18px",
         }}>
           <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Started</div>
           <div style={{ fontSize: "13px", fontFamily: "monospace", color: "rgba(255,255,255,0.7)" }}>{timestamp || "—"}</div>
         </div>
       </div>
 
+      {/* Community Alert Panel */}
+      {recording && (
+        <CommunityAlertPanel
+          emergencyType="SOS Evidence"
+          alertSent={alertSent}
+          alertId={alertId}
+          responders={responders}
+          sending={sending}
+          onSend={() => sendCommunityAlert({ emergencyType: "SOS Evidence" })}
+          onCancel={cancelAlert}
+        />
+      )}
+
       {!recording && !saved && (
-        <button
-          onClick={startSOS}
-          style={{
-            width: "100%", padding: "18px", background: "#dc2626",
-            color: "#fff", border: "none", borderRadius: "10px",
-            fontSize: "15px", fontFamily: "inherit", fontWeight: "500",
-            letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
-            boxShadow: "0 4px 24px rgba(220,38,38,0.4)"
-          }}
-        >
+        <button onClick={startSOS} style={{
+          width: "100%", padding: "18px", background: "#dc2626",
+          color: "#fff", border: "none", borderRadius: "10px",
+          fontSize: "15px", fontFamily: "inherit", fontWeight: "500",
+          letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
+          boxShadow: "0 4px 24px rgba(220,38,38,0.4)",
+        }}>
           🚨 Start SOS Recording
         </button>
       )}
 
       {recording && (
-        <button
-          onClick={stopSOS}
-          disabled={saving}
-          style={{
-            width: "100%", padding: "18px",
-            background: "transparent", color: "#f87171",
-            border: "1px solid rgba(248,113,113,0.5)", borderRadius: "10px",
-            fontSize: "15px", fontFamily: "inherit", fontWeight: "500",
-            letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
-            boxShadow: "0 0 20px rgba(248,113,113,0.1)"
-          }}
-        >
+        <button onClick={stopSOS} disabled={saving} style={{
+          width: "100%", padding: "18px",
+          background: "transparent", color: "#f87171",
+          border: "1px solid rgba(248,113,113,0.5)", borderRadius: "10px",
+          fontSize: "15px", fontFamily: "inherit", fontWeight: "500",
+          letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
+        }}>
           {saving ? "Saving Evidence..." : "⏹ Stop & Save Evidence"}
         </button>
       )}
@@ -242,7 +282,7 @@ export default function SOSEvidence() {
         <div style={{
           background: "rgba(0,200,100,0.08)", border: "1px solid rgba(0,200,100,0.25)",
           borderRadius: "10px", padding: "20px", textAlign: "center",
-          color: "#4ade80", fontSize: "16px", fontWeight: "300", letterSpacing: "0.3px"
+          color: "#4ade80", fontSize: "16px", fontWeight: "300",
         }}>
           ✅ Evidence saved and reported to authorities.
         </div>
