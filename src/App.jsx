@@ -8,14 +8,13 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import DangerMap from "./pages/DangerMap";
-import WatchMe from "./pages/WatchMe";
-import TrackView from "./pages/TrackView";
 import SOS from "./pages/SOS";
 import SOSEvidence from "./pages/SOSEvidence";
 import ERVideoCall from "./pages/ERVideoCall";
 import Report from "./pages/Report";
 import EmergencyID from "./pages/EmergencyID";
 import EmergencyCard from "./pages/EmergencyCard";
+import Profile from "./pages/Profile";
 
 import "./App.css";
 
@@ -30,9 +29,7 @@ function App() {
       setLoading(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -41,16 +38,10 @@ function App() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          background: "#0f0f0f",
-          color: "#fff",
-        }}
-      >
+      <div style={{
+        display: "flex", justifyContent: "center", alignItems: "center",
+        height: "100vh", background: "#0f0f0f", color: "#fff",
+      }}>
         Loading...
       </div>
     );
@@ -59,8 +50,7 @@ function App() {
   const ProtectedRoute = ({ element }) =>
     session ? element : <Navigate to="/login" />;
 
-  // pages where navbar should NOT appear
-  const hideNavbar = ["/dashboard", "/login", "/signup"];
+  const hideNavbar = ["/", "/dashboard", "/login", "/signup"];
 
   return (
     <>
@@ -73,15 +63,14 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Protected */}
-        <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
-        <Route path="/danger-map" element={<ProtectedRoute element={<DangerMap />} />} />
-        <Route path="/watchme" element={<ProtectedRoute element={<WatchMe />} />} />
-        <Route path="/track/:journeyId" element={<ProtectedRoute element={<TrackView />} />} />
-        <Route path="/sos" element={<ProtectedRoute element={<SOS />} />} />
+        <Route path="/dashboard"    element={<ProtectedRoute element={<Dashboard />} />} />
+        <Route path="/danger-map"   element={<ProtectedRoute element={<DangerMap />} />} />
+        <Route path="/sos"          element={<ProtectedRoute element={<SOS />} />} />
         <Route path="/sos/evidence" element={<ProtectedRoute element={<SOSEvidence />} />} />
-        <Route path="/sos/er" element={<ProtectedRoute element={<ERVideoCall />} />} />
-        <Route path="/report" element={<ProtectedRoute element={<Report />} />} />
+        <Route path="/sos/er"       element={<ProtectedRoute element={<ERVideoCall />} />} />
+        <Route path="/report"       element={<ProtectedRoute element={<Report />} />} />
         <Route path="/emergency-id" element={<ProtectedRoute element={<EmergencyID />} />} />
+        <Route path="/profile"      element={<ProtectedRoute element={<Profile />} />} />
 
         {/* Public */}
         <Route path="/emergency-card/:userId" element={<EmergencyCard />} />

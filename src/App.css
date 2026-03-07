@@ -378,15 +378,40 @@ textarea::placeholder { color: var(--muted); }
   gap: 1.5rem;
 }
 
-.sos-btn {
-  background-color: transparent;
-  color: var(--accent-red);
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  letter-spacing: 2px;
+.icon-btn img {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.icon-btn:hover img {
+  opacity: 1;
 }
 
+.sos-btn {
+  background-color: var(--accent-red);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1.25rem;
+  letter-spacing: 3px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(255, 77, 109, 0.5);
+  animation: sos-pulse 2s infinite;
+  transition: all 0.2s ease;
+}
+
+.sos-btn:hover {
+  background-color: var(--accent-red-hover);
+  box-shadow: 0 0 24px rgba(255, 77, 109, 0.75);
+  transform: scale(1.05);
+}
+
+@keyframes sos-pulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(255, 77, 109, 0.5); }
+  50%       { box-shadow: 0 0 26px rgba(255, 77, 109, 0.85); }
+}
 .icon-btn {
   background: transparent;
   border: none;
@@ -693,4 +718,14 @@ textarea::placeholder { color: var(--muted); }
   .dashboard-title {
     font-size: 2.5rem;
   }
+}
+
+select.form-input {
+  appearance: none;
+  background-color: var(--bg-darker);
+  color: var(--text-primary);
+}
+
+select.form-input option {
+  background-color: var(--bg-darker);
 }

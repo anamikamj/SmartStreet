@@ -5,6 +5,12 @@ function Landing() {
 
   return (
     <div className="landing-container">
+
+      {/* Brand-only header */}
+      <header className="dashboard-header">
+        <div className="brand">SmartStreet</div>
+      </header>
+
       {/* Hero Section */}
       <section className="hero-section">
         <h1 className="hero-title">Safer Streets Start With Awareness</h1>
@@ -21,6 +27,7 @@ function Landing() {
           </button>
         </div>
       </section>
+
     </div>
   );
 }

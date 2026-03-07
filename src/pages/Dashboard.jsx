@@ -1,13 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../services/supabaseClient";
+import bellIcon from "../assets/bell.svg";
+import userIcon from "../assets/user.svg";
 
 function Dashboard() {
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
 
   const dashboardFeatures = [
     {
@@ -38,9 +34,14 @@ function Dashboard() {
       {/* Header */}
       <header className="dashboard-header">
         <div className="brand">SmartStreet</div>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <button className="icon-btn" title="Notifications">
+            <img src={bellIcon} alt="Notifications" style={{ width: "22px", height: "22px" }} />
+          </button>
+          <button className="icon-btn" onClick={() => navigate("/profile")} title="Profile">
+            <img src={userIcon} alt="Profile" style={{ width: "22px", height: "22px" }} />
+          </button>
+        </div>
       </header>
 
       {/* Main Dashboard */}
