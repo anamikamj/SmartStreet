@@ -495,7 +495,7 @@ export default function ERVideoCall() {
       }}>← Back</button>
 
       <h1 style={{ fontSize: "52px", fontWeight: "300", letterSpacing: "-1px", marginBottom: "6px" }}>
-        🏥 Emergency ER Call
+        🏥 ER Call
       </h1>
       <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "17px", marginBottom: "28px", fontWeight: "300" }}>
         Live nurse call · Voice-guided first aid · Ambulance dispatch

@@ -79,7 +79,7 @@ export default function SOS() {
             marginBottom: "24px",
             letterSpacing: "-1px"
           }}>
-            Emergency ER Video Call
+            ER Video Call
           </h1>
           <p style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
